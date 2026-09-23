@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Retro Pixel Slime Haven</title>
+    <title>DerekSlime</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
@@ -190,6 +190,47 @@
             "STATUS: POOPY "
         ];
 
+        const colorPalettes = {
+            normal: {
+                1: '#581c87', // Dark outline
+                2: '#a855f7', // Vibrant purple slime
+                3: '#d8b4fe', // Highlight
+                4: '#2e1065', // Eyes
+                5: '#2e1065'  // Mouth
+            },
+            hugs: {
+                1: '#be185d', // Dark pink outline
+                2: '#ec4899', // Hot pink slime
+                3: '#fbcfe8', // Highlight
+                4: '#831843', // Eyes
+                5: '#831843'  // Mouth
+            },
+            cozy: {
+                1: '#1e40af', // Dark blue outline
+                2: '#3b82f6', // Cozy blue slime
+                3: '#bfdbfe', // Highlight
+                4: '#1e3a8a', // Eyes
+                5: '#1e3a8a'  // Mouth
+            },
+            hungry: {
+                1: '#c2410c', // Dark orange outline
+                2: '#f97316', // Warm orange slime
+                3: '#ffedd5', // Highlight
+                4: '#7c2d12', // Eyes
+                5: '#7c2d12'  // Mouth
+            },
+            poopy: {
+                1: '#451a03', // Dark brown outline
+                2: '#854d0e', // Classic brown slime
+                3: '#fef08a', // Highlight
+                4: '#271c04', // Eyes
+                5: '#271c04'  // Mouth
+            }
+        };
+
+        const moodPaletteKeys = ['normal', 'hugs', 'cozy', 'hungry', 'poopy'];
+        let currentPalette = colorPalettes.normal;
+
         const spriteCanvas = document.getElementById('spriteCanvas');
         const sCtx = spriteCanvas.getContext('2d');
 
@@ -198,8 +239,8 @@
             [0,0,1,2,2,2,2,2,1,0,0],
             [0,1,2,3,3,2,2,2,2,1,0],
             [1,2,2,2,2,2,2,2,2,2,1],
-            [1,2,4,2,2,2,2,4,2,2,1], // Exactly two dark pixels for eyes
-            [1,2,2,2,5,5,2,2,2,2,1], // Small cute mouth
+            [1,2,4,2,2,2,2,4,2,2,1], 
+            [1,2,2,2,5,5,2,2,2,2,1], 
             [1,2,2,2,2,2,2,2,2,2,1],
             [1,1,1,1,1,1,1,1,1,1,1]
         ];
@@ -208,22 +249,14 @@
             [0,0,0,1,1,1,1,1,0,0,0],
             [0,0,1,2,2,2,2,2,1,0,0],
             [0,1,2,3,3,2,2,2,2,1,0],
-            [1,2,4,2,2,2,2,4,2,2,1], // Two eyes
+            [1,2,4,2,2,2,2,4,2,2,1], 
             [1,2,2,2,2,2,2,2,2,2,1],
-            [1,2,2,2,5,5,5,2,2,2,1], // Happy curved smile
+            [1,2,2,2,5,5,5,2,2,2,1], 
             [1,2,2,2,2,2,2,2,2,2,1],
             [1,1,1,1,1,1,1,1,1,1,1]
         ];
 
-        const slimeColorMap = {
-            1: '#581c87', // Dark outline
-            2: '#a855f7', // Vibrant purple slime
-            3: '#d8b4fe', // Highlight
-            4: '#2e1065', // Eyes (dark)
-            5: '#2e1065'  // Mouth
-        };
-
-        function drawPixelSlime(isHappy = false) {
+        function drawPixelSlime(isHappy = false, palette = colorPalettes.normal) {
             sCtx.clearRect(0, 0, spriteCanvas.width, spriteCanvas.height);
             const matrix = isHappy ? slimeMatrixHappy : slimeMatrixNormal;
             const pSize = 7;
@@ -234,23 +267,23 @@
                 for (let c = 0; c < matrix[r].length; c++) {
                     const val = matrix[r][c];
                     if (val > 0) {
-                        sCtx.fillStyle = slimeColorMap[val];
+                        sCtx.fillStyle = palette[val];
                         sCtx.fillRect(offsetX + c * pSize, offsetY + r * pSize, pSize, pSize);
                     }
                 }
             }
         }
 
-        drawPixelSlime(false);
+        drawPixelSlime(false, currentPalette);
 
         function onSlimeClick() {
             const container = document.getElementById('spriteContainer');
             container.classList.add('slime-bounce');
-            drawPixelSlime(true);
+            drawPixelSlime(true, currentPalette);
             triggerPixelHearts();
             setTimeout(() => {
                 container.classList.remove('slime-bounce');
-                drawPixelSlime(false);
+                drawPixelSlime(false, currentPalette);
             }, 500);
         }
 
@@ -264,28 +297,21 @@
                 textEl.style.opacity = '1';
             }, 100);
 
-            const randomMood = moods[Math.floor(Math.random() * moods.length)];
+            const randomIndex = Math.floor(Math.random() * moods.length);
+            const randomMood = moods[randomIndex];
+            const paletteKey = moodPaletteKeys[randomIndex];
+            currentPalette = colorPalettes[paletteKey];
+
             document.getElementById('spriteMood').textContent = randomMood;
 
             const container = document.getElementById('spriteContainer');
             container.classList.add('slime-bounce');
-            drawPixelSlime(true);
+            drawPixelSlime(true, currentPalette);
             triggerPixelHearts();
             setTimeout(() => {
                 container.classList.remove('slime-bounce');
-                drawPixelSlime(false);
+                drawPixelSlime(false, currentPalette);
             }, 500);
-        }
-
-        function handleImage(event, imgId) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById(imgId).src = e.target.result;
-                }
-                reader.readAsDataURL(file);
-            }
         }
 
         const canvas = document.getElementById('pixelCanvas');
